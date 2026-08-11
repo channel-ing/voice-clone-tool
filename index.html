@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>å£°é³åéå·¥å·</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #f0edf9;
+      --card:         #ffffff;
+      --primary:      #6d4fc4;
+      --primary-dk:   #5a3ea8;
+      --primary-lt:   #ede9f9;
+      --text:         #1a1a2e;
+      --muted:        #6b7280;
+      --border:       #e5e0f5;
+      --success-bg:   #f0fdf4;
+      --success-bd:   #a7f3d0;
+      --success-text: #065f46;
+      --error:        #ef4444;
+      --success:      #10b981;
+      --radius:       16px;
+      --shadow:       0 4px 24px rgba(109, 79, 196, 0.09);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 16px 60px;
+    }
+
+    /* ââ Header ââââââââââââââââââââââââââââââââ */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      letter-spacing: -.5px;
+    }
+    header p { color: var(--muted); font-size: .95rem; }
+
+    /* ââ Cards âââââââââââââââââââââââââââââââââ */
+    .steps {
+      max-width: 660px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .badge {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 1.05rem; font-weight: 600; }
+
+    /* ââ Upload zone âââââââââââââââââââââââââââ */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--primary-lt);
+      margin-bottom: 14px;
+      user-select: none;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--primary);
+      background: #e4dcf5;
+    }
+    .upload-zone .icon { font-size: 2.2rem; margin-bottom: 10px; }
+    .upload-zone .label { font-size: .9rem; color: var(--muted); }
+    .upload-zone .label strong { color: var(--primary); }
+    .upload-zone .hint { font-size: .78rem; color: #a0aec0; margin-top: 6px; }
+
+    .file-pill {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--primary-lt);
+      border-radius: 9px;
+      margin-bottom: 14px;
+      font-size: .88rem;
+    }
+    .file-pill.show { display: flex; }
+    .file-pill .name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-pill .rm { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: 2px 4px; }
+    .file-pill .rm:hover { color: var(--error); }
+
+    /* ââ Buttons âââââââââââââââââââââââââââââââ */
+    .btn {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: .92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dk); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* ââ Result box ââââââââââââââââââââââââââââ */
+    .result-box {
+      display: none;
+      background: var(--success-bg);
+      border: 1px solid var(--success-bd);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .result-box.show { display: block; }
+    .result-box .label { font-size: .82rem; color: var(--success-text); margin-bottom: 8px; }
+    .voice-row { display: flex; align-items: center; gap: 8px; }
+    .voice-row code {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--success-bd);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: .88rem;
+      color: var(--success-text);
+      word-break: break-all;
+    }
+    .btn-sm {
+      padding: 8px 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .btn-sm:hover { background: var(--primary-dk); }
+
+    /* ââ Form ââââââââââââââââââââââââââââââââââ */
+    .fg { margin-bottom: 14px; }
+    .fg label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .fg input, .fg textarea, .fg select {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .88rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .fg input:focus, .fg textarea:focus, .fg select:focus { border-color: var(--primary); }
+    .fg textarea { resize: vertical; min-height: 96px; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ââ Audio result ââââââââââââââââââââââââââ */
+    .audio-box {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      background: var(--primary-lt);
+      border-radius: 10px;
+    }
+    .audio-box.show { display: block; }
+    .audio-box .label { font-size: .82rem; color: var(--primary); font-weight: 500; margin-bottom: 8px; }
+    .audio-box audio { width: 100%; margin-bottom: 10px; }
+    .btn-dl {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .btn-dl:hover { background: var(--primary-dk); }
+
+    /* ââ Spinner âââââââââââââââââââââââââââââââ */
+    .spin {
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ââ Toast âââââââââââââââââââââââââââââââââ */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 11px 22px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: .88rem;
+      font-weight: 500;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s;
+      z-index: 99;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .toast.ok  { background: var(--success); }
+    .toast.err { background: var(--error); }
+
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      font-size: .78rem;
+      color: #c4b5fd;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ðï¸ å£°é³åéå·¥å·</h1>
+  <p>ä¸ä¼ é³é¢ï¼åéå£°é³ï¼ç¨åéå£°é³åæä»»æåå®¹</p>
+</header>
+
+<div class="steps">
+
+  <!-- ââ Step 1: Clone ââ -->
+  <div class="card">
+    <div class="card-header">
+      <div class="badge">1</div>
+      <h2>ä¸ä¼ é³é¢ï¼åéå£°é³</h2>
+    </div>
+
+    <div class="upload-zone" id="dropZone">
+      <div class="icon">ðµ</div>
+      <div class="label">å°æä»¶æå°æ­¤å¤ï¼æ <strong>ç¹å»éæ©</strong></div>
+      <div class="hint">æ¯æ MP3 / WAV / M4A Â· å»ºè®® 10â300 ç§æ¸æ°äººå£° Â· æå¤§ 20 MB</div>
+    </div>
+    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+
+    <div class="file-pill" id="filePill">
+      <span>ð¶</span>
+      <span class="name" id="fileName"></span>
+      <button class="rm" id="removeFile" title="ç§»é¤">Ã</button>
+    </div>
+
+    <button class="btn btn-primary" id="cloneBtn" disabled>
+      å¼å§åé
+    </button>
+
+    <div class="result-box" id="cloneResult">
+      <div class="label">â åéæåï¼è¯·ä¿å­è¿ä¸ª Voice IDï¼ä¹åå¯éå¤ä½¿ç¨ï¼</div>
+      <div class="voice-row">
+        <code id="voiceIdCode"></code>
+        <button class="btn-sm" id="copyBtn">å¤å¶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ââ Step 2: TTS ââ -->
+  <div class="card">
+    <div class="card-header">
+      <div class="badge">2</div>
+      <h2>ç¨åéå£°é³åæè¯­é³</h2>
+    </div>
+
+    <div class="fg">
+      <label>Voice ID</label>
+      <input type="text" id="voiceIdInput" placeholder="åéæååèªå¨å¡«å¥ï¼ä¹å¯æå¨ç²è´´" />
+    </div>
+
+    <div class="fg">
+      <label>è¦åæçæå­</label>
+      <textarea id="textInput" placeholder="å¨è¿éè¾å¥æ³è¦æè¯»çåå®¹â¦"></textarea>
+    </div>
+
+    <div class="row-2">
+      <div class="fg">
+        <label>è¯­é</label>
+        <select id="speedSelect">
+          <option value="0.7">æ¢é 0.7Ã</option>
+          <option value="0.9">ç¨æ¢ 0.9Ã</option>
+          <option value="1.0" selected>æ­£å¸¸ 1.0Ã</option>
+          <option value="1.2">ç¨å¿« 1.2Ã</option>
+          <option value="1.5">å¿«é 1.5Ã</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>é³è°</label>
+        <select id="pitchSelect">
+          <option value="-4">åä½ â4</option>
+          <option value="-2">ç¥ä½ â2</option>
+          <option value="0" selected>é»è®¤ 0</option>
+          <option value="2">ç¥é« +2</option>
+          <option value="4">åé« +4</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="ttsBtn">
+      åæè¯­é³
+    </button>
+
+    <div class="audio-box" id="audioBox">
+      <div class="label">â åæå®æï¼ç¹å»æ­æ¾ï¼</div>
+      <audio controls id="audioPlayer"></audio>
+      <a id="dlLink" class="btn-dl" download="synthesized.mp3">â¬ ä¸è½½ MP3</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>Powered by MiniMax API</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ââ refs âââââââââââââââââââââââââââââââââââââââââ */
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const filePill   = document.getElementById('filePill');
+const fileNameEl = document.getElementById('fileName');
+const removeFile = document.getElementById('removeFile');
+const cloneBtn   = document.getElementById('cloneBtn');
+const cloneResult= document.getElementById('cloneResult');
+const voiceIdCode= document.getElementById('voiceIdCode');
+const copyBtn    = document.getElementById('copyBtn');
+const voiceIdInput = document.getElementById('voiceIdInput');
+const textInput  = document.getElementById('textInput');
+const speedSelect= document.getElementById('speedSelect');
+const pitchSelect= document.getElementById('pitchSelect');
+const ttsBtn     = document.getElementById('ttsBtn');
+const audioBox   = document.getElementById('audioBox');
+const audioPlayer= document.getElementById('audioPlayer');
+const dlLink     = document.getElementById('dlLink');
+const toastEl    = document.getElementById('toast');
+
+let selectedFile = null;
+let toastTimer   = null;
+let currentBlobUrl = null;
+
+/* ââ toast âââââââââââââââââââââââââââââââââââââââ */
+function toast(msg, type = 'ok') {
+  clearTimeout(toastTimer);
+  toastEl.textContent = msg;
+  toastEl.className   = `toast ${type} show`;
+  toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 3500);
+}
+
+/* ââ file handling ââââââââââââââââââââââââââââââââ */
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => setFile(e.target.files[0]));
+
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  setFile(e.dataTransfer.files[0]);
+});
+
+removeFile.addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+
+function setFile(f) {
+  if (!f) return;
+  if (!f.type.startsWith('audio/')) { toast('è¯·éæ©é³é¢æä»¶', 'err'); return; }
+  if (f.size > 20 * 1024 * 1024)   { toast('æä»¶ä¸è½è¶è¿ 20 MB', 'err'); return; }
+  selectedFile = f;
+  fileNameEl.textContent = f.name;
+  filePill.classList.add('show');
+  cloneBtn.disabled = false;
+  cloneResult.classList.remove('show');
+}
+
+function clearFile() {
+  selectedFile    = null;
+  fileInput.value = '';
+  filePill.classList.remove('show');
+  cloneBtn.disabled = true;
+  cloneResult.classList.remove('show');
+}
+
+/* ââ clone ââââââââââââââââââââââââââââââââââââââââ */
+cloneBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  setLoading(cloneBtn, true, 'åéä¸­â¦');
+  cloneResult.classList.remove('show');
+  try {
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+    const r = await fetch('/api/clone', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'åéè¯·æ±å¤±è´¥');
+    const vid = d.voice_id || d.data?.voice_id || d.id;
+    if (!vid) throw new Error('æªæ¾å° voice_idï¼è¯·æ£æ¥ API ç«¯ç¹éç½®');
+    voiceIdCode.textContent = vid;
+    voiceIdInput.value      = vid;
+    cloneResult.classList.add('show');
+    toast('å£°é³åéæåï¼');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    setLoading(cloneBtn, false, 'å¼å§åé');
+  }
+});
+
+/* ââ copy âââââââââââââââââââââââââââââââââââââââââ */
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(voiceIdCode.textContent)
+    .then(() => toast('å·²å¤å¶ Voice ID'))
+    .catch(() => toast('å¤å¶å¤±è´¥ï¼è¯·æå¨éæ©', 'err'));
+});
+
+/* ââ tts ââââââââââââââââââââââââââââââââââââââââââ */
+ttsBtn.addEventListener('click', async () => {
+  const vid  = voiceIdInput.value.trim();
+  const text = textInput.value.trim();
+  if (!vid)  { toast('è¯·å¡«å Voice ID', 'err'); return; }
+  if (!text) { toast('è¯·è¾å¥è¦åæçæå­', 'err'); return; }
+
+  setLoading(ttsBtn, true, 'åæä¸­â¦');
+  audioBox.classList.remove('show');
+  if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+
+  try {
+    const r = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        voice_id: vid,
+        text,
+        speed: parseFloat(speedSelect.value),
+        pitch: parseInt(pitchSelect.value),
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'åæè¯·æ±å¤±è´¥');
+    const hex = d.data?.audio;
+    if (!hex) throw new Error('æªæ¾å°é³é¢æ°æ®ï¼è¯·æ£æ¥ API ç«¯ç¹éç½®');
+    const blob = hexToBlob(hex);
+    currentBlobUrl        = URL.createObjectURL(blob);
+    audioPlayer.src       = currentBlobUrl;
+    dlLink.href           = currentBlobUrl;
+    audioBox.classList.add('show');
+    audioPlayer.play().catch(() => {});
+    toast('åæå®æï¼');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    setLoading(ttsBtn, false, 'åæè¯­é³');
+  }
+});
+
+/* ââ helpers ââââââââââââââââââââââââââââââââââââââ */
+function hexToBlob(hex) {
+  const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+  return new Blob([bytes], { type: 'audio/mpeg' });
+}
+
+function setLoading(btn, on, idleText) {
+  btn.disabled  = on;
+  btn.innerHTML = on ? '<span class="spin"></span> ' + idleText : idleText;
+}
+</script>
+</body>
+</html>
